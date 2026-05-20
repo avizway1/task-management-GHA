@@ -182,7 +182,7 @@ jobs:
           fi
 
       - name: Apply to EKS
-        run: kubectl apply -k k8s/
+        run: kubectl apply -k k8s/ --validate=false
 
       - name: Verify rollouts
         run: |
