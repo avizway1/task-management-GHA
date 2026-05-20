@@ -122,11 +122,11 @@ jobs:
             echo "==> Pushed ${SERVICE}:${SHA}"
           }
 
-          [[ "${{ needs.detect-changes.outputs.frontend }}" == "true" ]]             && build_and_push frontend
-          [[ "${{ needs.detect-changes.outputs.user-service }}" == "true" ]]         && build_and_push user-service
-          [[ "${{ needs.detect-changes.outputs.task-service }}" == "true" ]]         && build_and_push task-service
-          [[ "${{ needs.detect-changes.outputs.notification-service }}" == "true" ]] && build_and_push notification-service
-          [[ "${{ needs.detect-changes.outputs.analytics-service }}" == "true" ]]    && build_and_push analytics-service
+          if [[ "${{ needs.detect-changes.outputs.frontend }}" == "true" ]];             then build_and_push frontend;             fi
+          if [[ "${{ needs.detect-changes.outputs.user-service }}" == "true" ]];         then build_and_push user-service;         fi
+          if [[ "${{ needs.detect-changes.outputs.task-service }}" == "true" ]];         then build_and_push task-service;         fi
+          if [[ "${{ needs.detect-changes.outputs.notification-service }}" == "true" ]]; then build_and_push notification-service; fi
+          if [[ "${{ needs.detect-changes.outputs.analytics-service }}" == "true" ]];    then build_and_push analytics-service;    fi
 
   deploy:
     needs: [detect-changes, build-push]
@@ -165,20 +165,21 @@ jobs:
           SHA="${{ github.sha }}"
           cd k8s
 
-          [[ "${{ needs.detect-changes.outputs.frontend }}" == "true" ]] && \
+          if [[ "${{ needs.detect-changes.outputs.frontend }}" == "true" ]]; then
             kustomize edit set image task-management/frontend=${REGISTRY}/task-management/frontend:${SHA}
-
-          [[ "${{ needs.detect-changes.outputs.user-service }}" == "true" ]] && \
+          fi
+          if [[ "${{ needs.detect-changes.outputs.user-service }}" == "true" ]]; then
             kustomize edit set image task-management/user-service=${REGISTRY}/task-management/user-service:${SHA}
-
-          [[ "${{ needs.detect-changes.outputs.task-service }}" == "true" ]] && \
+          fi
+          if [[ "${{ needs.detect-changes.outputs.task-service }}" == "true" ]]; then
             kustomize edit set image task-management/task-service=${REGISTRY}/task-management/task-service:${SHA}
-
-          [[ "${{ needs.detect-changes.outputs.notification-service }}" == "true" ]] && \
+          fi
+          if [[ "${{ needs.detect-changes.outputs.notification-service }}" == "true" ]]; then
             kustomize edit set image task-management/notification-service=${REGISTRY}/task-management/notification-service:${SHA}
-
-          [[ "${{ needs.detect-changes.outputs.analytics-service }}" == "true" ]] && \
+          fi
+          if [[ "${{ needs.detect-changes.outputs.analytics-service }}" == "true" ]]; then
             kustomize edit set image task-management/analytics-service=${REGISTRY}/task-management/analytics-service:${SHA}
+          fi
 
       - name: Apply to EKS
         run: kubectl apply -k k8s/
