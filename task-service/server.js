@@ -64,5 +64,5 @@ app.use('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Task service running on port ${PORT}`);
+  console.log(`Task service now running on port ${PORT}`);
 });
