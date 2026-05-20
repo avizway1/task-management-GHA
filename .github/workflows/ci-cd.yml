@@ -17,6 +17,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 env:
   AWS_REGION: ap-south-1
@@ -48,9 +49,10 @@ jobs:
           BEFORE: ${{ github.event.before }}
           SHA: ${{ github.sha }}
         run: |
-          # First push to branch: before SHA is all zeros — build everything
-          if [[ "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
-            echo "First push — marking all services as changed"
+          # Manual trigger (workflow_dispatch) or first push: build everything
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || \
+                "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
+            echo "Manual trigger or first push — marking all services as changed"
             for key in frontend user-service task-service notification-service analytics-service k8s any-service; do
               echo "${key}=true" >> "$GITHUB_OUTPUT"
             done

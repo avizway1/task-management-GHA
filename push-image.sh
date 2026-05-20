@@ -1,4 +1,8 @@
 #!/bin/bash
+# ONE-TIME SETUP SCRIPT
+# Run this manually once before the GitHub Actions CI/CD pipeline is used.
+# It creates the ECR repositories and pushes an initial :latest image for each service.
+# After this, all builds and pushes are handled automatically by .github/workflows/ci-cd.yml
 set -e
 
 # Set variables
