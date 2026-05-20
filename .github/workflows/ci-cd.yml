@@ -152,6 +152,25 @@ jobs:
             --name ${{ secrets.EKS_CLUSTER_NAME }} \
             --region ${{ env.AWS_REGION }}
 
+      - name: Debug cluster access
+        run: |
+          echo "=== Who am I (the identity EKS will see) ==="
+          aws sts get-caller-identity
+          echo ""
+          echo "=== Cluster endpoint / public access config ==="
+          aws eks describe-cluster \
+            --name ${{ secrets.EKS_CLUSTER_NAME }} \
+            --region ${{ env.AWS_REGION }} \
+            --query "cluster.{endpointPublicAccess:resourcesVpcConfig.endpointPublicAccess,endpointPrivateAccess:resourcesVpcConfig.endpointPrivateAccess,publicAccessCidrs:resourcesVpcConfig.publicAccessCidrs}"
+          echo ""
+          echo "=== Access entries on the cluster ==="
+          aws eks list-access-entries \
+            --cluster-name ${{ secrets.EKS_CLUSTER_NAME }} \
+            --region ${{ env.AWS_REGION }}
+          echo ""
+          echo "=== Test kubectl (verbose) ==="
+          kubectl get nodes -v=6 2>&1 | head -40
+
       - name: Set up Kustomize
         run: |
           curl -sfLo kustomize.tar.gz \
