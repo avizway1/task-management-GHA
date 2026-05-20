@@ -15,6 +15,7 @@ resources:
   - notification-service.yaml
   - analytics-service.yaml
   - frontend.yaml
+  - jaeger.yaml
   - ingress.yaml
 
 # CI updates these tags via: kustomize edit set image task-management/<service>=<ecr-url>:<sha>

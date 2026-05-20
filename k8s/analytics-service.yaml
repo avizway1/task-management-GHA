@@ -35,6 +35,17 @@ spec:
             secretKeyRef:
               name: app-secrets
               key: JWT_SECRET
+        - name: OTEL_SERVICE_NAME
+          value: "analytics-service"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
+        - name: OTEL_TRACES_EXPORTER
+          value: "otlp"
+        - name: OTEL_EXPORTER_OTLP_PROTOCOL
+          value: "http/protobuf"
         resources:
           requests:
             memory: "64Mi"

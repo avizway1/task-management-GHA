@@ -42,6 +42,13 @@ spec:
               key: JWT_SECRET
         - name: USER_SERVICE_URL
           value: "http://user-service:3001"
+        - name: OTEL_SERVICE_NAME
+          value: "task-service"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
         resources:
           requests:
             memory: "64Mi"

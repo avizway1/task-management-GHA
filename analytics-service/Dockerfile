@@ -24,5 +24,6 @@ COPY . .
 
 EXPOSE 3004
 
-# Run with uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "3004"]
+# Run with uvicorn, wrapped by opentelemetry-instrument for auto-tracing.
+# Tracing is configured via OTEL_* env vars set in the Kubernetes deployment.
+CMD ["opentelemetry-instrument", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "3004"]

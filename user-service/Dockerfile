@@ -23,4 +23,4 @@ EXPOSE 3001
 
 # Health check removed - healthcheck.js not found
 
-CMD ["node", "server.js"]
+CMD ["node", "--require", "./tracing.js", "server.js"]

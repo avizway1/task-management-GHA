@@ -22,4 +22,4 @@ USER nodejs
 EXPOSE 3003
 
 
-CMD ["node", "server.js"]
+CMD ["node", "--require", "./tracing.js", "server.js"]
