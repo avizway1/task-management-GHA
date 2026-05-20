@@ -21,6 +21,7 @@ on:
 env:
   AWS_REGION: ap-south-1
 
+
 permissions:
   id-token: write
   contents: read
@@ -37,36 +38,58 @@ jobs:
       k8s: ${{ steps.filter.outputs.k8s }}
       any-service: ${{ steps.filter.outputs.any-service }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
+      - uses: actions/checkout@v6
         with:
-          filters: |
-            frontend:
-              - 'frontend/**'
-            user-service:
-              - 'user-service/**'
-            task-service:
-              - 'task-service/**'
-            notification-service:
-              - 'notification-service/**'
-            analytics-service:
-              - 'analytics-service/**'
-            k8s:
-              - 'k8s/**'
-            any-service:
-              - 'frontend/**'
-              - 'user-service/**'
-              - 'task-service/**'
-              - 'notification-service/**'
-              - 'analytics-service/**'
+          fetch-depth: 0
+
+      - name: Detect changed paths
+        id: filter
+        env:
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          # First push to branch: before SHA is all zeros — build everything
+          if [[ "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
+            echo "First push — marking all services as changed"
+            for key in frontend user-service task-service notification-service analytics-service k8s any-service; do
+              echo "${key}=true" >> "$GITHUB_OUTPUT"
+            done
+            exit 0
+          fi
+
+          CHANGED=$(git diff --name-only "$BEFORE" "$SHA")
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          has_changes() { echo "$CHANGED" | grep -q "^$1/" && echo "true" || echo "false"; }
+
+          FRONTEND=$(has_changes frontend)
+          USER_SVC=$(has_changes user-service)
+          TASK_SVC=$(has_changes task-service)
+          NOTIF_SVC=$(has_changes notification-service)
+          ANALYTICS=$(has_changes analytics-service)
+          K8S=$(has_changes k8s)
+
+          echo "frontend=${FRONTEND}"             >> "$GITHUB_OUTPUT"
+          echo "user-service=${USER_SVC}"         >> "$GITHUB_OUTPUT"
+          echo "task-service=${TASK_SVC}"         >> "$GITHUB_OUTPUT"
+          echo "notification-service=${NOTIF_SVC}" >> "$GITHUB_OUTPUT"
+          echo "analytics-service=${ANALYTICS}"  >> "$GITHUB_OUTPUT"
+          echo "k8s=${K8S}"                       >> "$GITHUB_OUTPUT"
+
+          if [[ "$FRONTEND" == "true" || "$USER_SVC" == "true" || "$TASK_SVC" == "true" || \
+                "$NOTIF_SVC" == "true" || "$ANALYTICS" == "true" ]]; then
+            echo "any-service=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "any-service=false" >> "$GITHUB_OUTPUT"
+          fi
 
   build-push:
     needs: detect-changes
     if: needs.detect-changes.outputs.any-service == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -113,7 +136,7 @@ jobs:
       (needs.detect-changes.outputs.any-service == 'true' || needs.detect-changes.outputs.k8s == 'true')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
