@@ -61,5 +61,5 @@ app.use('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`User service running on port ${PORT}`);
+  console.log(`User service now running on port ${PORT}`);
 });
